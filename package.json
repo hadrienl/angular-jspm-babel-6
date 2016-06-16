@@ -29,9 +29,6 @@
   "author": "",
   "license": "MIT",
   "jspm": {
-    "directories": {
-      "baseURL": "src"
-    },
     "devDependencies": {
       "babel": "npm:babel-core@^6.3.17",
       "babel-runtime": "npm:babel-runtime@^5.8.24",

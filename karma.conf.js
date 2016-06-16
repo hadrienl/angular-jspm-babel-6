@@ -12,7 +12,7 @@ module.exports = function (config) {
 		],
 
 		jspm: {
-			config: 'src/config.js',
+			config: 'config.js',
 			loadFiles: [
 				'src/*.spec.js'
 			],
@@ -23,7 +23,7 @@ module.exports = function (config) {
 
 		proxies: {
 			'/src/': '/base/src/',
-			'/jspm_packages/': '/src/jspm_packages/'
+			'/jspm_packages/': '/base/jspm_packages/'
 		},
 
 		browsers: ['PhantomJS'],
