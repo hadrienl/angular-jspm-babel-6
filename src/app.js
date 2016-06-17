@@ -4,7 +4,7 @@ import angular from 'angular';
 import {ConfigComponent} from './config/config';
 
 import {MainComponent} from './components/main/main';
-
+console.log(MainComponent);
 // Core
 import {DecoratorsModule} from './config/decorators';
 import {appName} from './config/constants';
@@ -15,5 +15,9 @@ var app = angular.module(appName, [
 
   MainComponent.name
 ]);
+
+angular.element(document).ready(function() {
+  angular.bootstrap(document, [appName]);
+});
 
 export {app};

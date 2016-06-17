@@ -1,0 +1,1 @@
+{"version":3,"sources":["config/constants.js"],"names":[],"mappings":";;;;;AAAO,IAAI,4BAAW,KAAf;AACA,IAAI,4BAAU,OAAd","file":"config/constants.js","sourcesContent":["export let appName  = 'app';\nexport let baseURL = 'dist/';\n"],"sourceRoot":"/source/"}
