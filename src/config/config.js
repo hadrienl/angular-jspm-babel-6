@@ -1,10 +1,11 @@
 import angular from 'angular';
 import {appName} from './constants';
 
-import DecoratorsComponent from './decorators';
+import {DecoratorsModule} from './decorators';
+import {authInterceptorModule} from './auth-interceptor';
 
-let configComponent = angular.module(`${appName}.core`, [
-  DecoratorsComponent.name
-]);
-
-export default configComponent;
+export let ConfigComponent = angular.module(`${appName}.config`, [
+  DecoratorsModule.name,
+  authInterceptorModule.name
+])
+.config($httpProvider => $httpProvider.interceptors.push('AuthInterceptor'));

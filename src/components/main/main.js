@@ -4,6 +4,4 @@ import MainController from './main-controller';
 import FlickrGallery from './flickr-gallery-directive';
 import FlickrService from './flickr-service';
 
-let MainComponent = angular.module(`${appName}.main`, []);
-
-export default MainComponent;
+export let MainComponent = angular.module(`${appName}.main`, []);

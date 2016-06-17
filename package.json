@@ -34,7 +34,8 @@
   "jspm": {
     "dependencies": {
       "angular": "github:angular/bower-angular@^1.5.7",
-      "angular-mocks": "github:angular/bower-angular-mocks@^1.5.7"
+      "angular-mocks": "github:angular/bower-angular-mocks@^1.5.7",
+      "angular-ui-router": "github:angular-ui/angular-ui-router-bower@^0.3.1"
     },
     "devDependencies": {
       "babel": "npm:babel-core@^6.3.17",

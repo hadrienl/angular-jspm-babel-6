@@ -1,2 +1,2 @@
-export const appName  = 'app';
-export const baseURL = 'dist/';
+export let appName  = 'app';
+export let baseURL = 'dist/';
