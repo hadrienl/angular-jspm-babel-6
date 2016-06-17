@@ -2,6 +2,7 @@
 module.exports = function (config) {
 	'use strict';
 	config.set({
+		//logLevel: config.LOG_DEBUG,
 		autoWatch: true,
 		singleRun: true,
 
@@ -12,12 +13,13 @@ module.exports = function (config) {
 		],
 
 		jspm: {
-			config: 'config.js',
 			loadFiles: [
-				'src/*.spec.js'
+				'src/**/*.js',
+				//'src/**/*.spec.js',
+				'src/**/*.html'
 			],
 			serveFiles: [
-				'src/!(*spec).js'
+				'src/**/*!(*spec).js'
 			]
 		},
 
@@ -29,17 +31,29 @@ module.exports = function (config) {
 		browsers: ['PhantomJS'],
 
 		preprocessors: {
-			'src/!(*spec).js': ['babel', 'sourcemap', 'coverage']
+			'src/**/*!(*spec).js': ['babel', 'sourcemap', 'coverage'],
+			'src/**/*.html': ['ng-html2js']
 		},
 
 		babelPreprocessor: {
 			options: {
-				sourceMap: 'inline'
+				sourceMap: 'inline',
+			  presets: ['es2015'],
+			  plugins: [
+			    'transform-decorators-legacy',
+			    'transform-class-properties'
+			  ]
 			},
 			sourceFileName: function(file) {
 				return file.originalPath;
 			}
 		},
+
+		ngHtml2JsPreprocessor: {
+      stripPrefix: 'src',
+      prependPrefix: 'dist',
+      moduleName: 'mocked-templates'
+    },
 
 		reporters: ['coverage', 'progress'],
 
