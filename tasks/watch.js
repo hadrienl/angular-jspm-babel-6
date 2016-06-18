@@ -2,16 +2,19 @@ var gulp = require('gulp'),
   runSequence = require('run-sequence'),
   babel = require('gulp-babel'),
   fs = require('fs'),
-  browserSync = require('browser-sync'),
+  browserSync = require('browser-sync').create(),
   changed = require('gulp-changed'),
   plumber = require('gulp-plumber'),
-  reload = browserSync.reload,
   sourcemaps = require('gulp-sourcemaps'),
   del = require('del'),
   preprocess = require('gulp-preprocess'),
-  NODE_ENV = process.env.NODE_ENV || 'development';
-
-var path;
+  sass = require('gulp-sass'),
+  autoprefixer = require('gulp-autoprefixer'),
+  rename = require('gulp-rename'),
+  exec = require('gulp-exec'),
+  purify = require('gulp-purifycss'),
+  NODE_ENV = process.env.NODE_ENV || 'development',
+  path;
 
 module.exports = function (_path_) {
   path = _path_;
@@ -25,36 +28,46 @@ var compilerOptions = {
   ]
 };
 
-gulp.task('build-system', function () {
+var jshintConfig = {esnext:true};
+
+gulp.task('build-app', function () {
+  return gulp.src('src/app-template.js')
+    .pipe(preprocess({
+      context: getConfig()
+    }))
+    .pipe(rename('app.js'))
+    .pipe(gulp.dest('src'));
+});
+
+gulp.task('build-system', ['build-app'], function () {
   return gulp.src(path.scripts)
     .pipe(plumber())
     .pipe(changed(path.output, {extension: '.js'}))
     .pipe(sourcemaps.init())
+    .pipe(preprocess({
+      context: getConfig()
+    }))
     .pipe(babel(compilerOptions))
-    .pipe(sourcemaps.write("."))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(path.output))
-    .pipe(browserSync.reload({ stream: true }));
+    .pipe(browserSync.stream());
 });
 
 gulp.task('build-html', function () {
   return gulp.src(path.html)
     .pipe(changed(path.output, {extension: '.html'}))
     .pipe(preprocess({
-      context: {
-        NODE_ENV: NODE_ENV
-      }
+      context: getConfig()
     }))
     .pipe(gulp.dest(path.output))
-    .pipe(browserSync.reload({ stream: true }));
+    .pipe(browserSync.stream());
 });
-/**
-TODO : make a eslint task
+
 gulp.task('lint', function() {
-  return gulp.src(path.scripts)
+  return gulp.src(path.source)
     .pipe(jshint(jshintConfig))
     .pipe(jshint.reporter(stylish));
 });
-*/
 
 gulp.task('clean-dist', function (done) {
   del('dist', done);
@@ -62,13 +75,13 @@ gulp.task('clean-dist', function (done) {
 
 gulp.task('build', function(callback) {
   return runSequence(
-    ['build-system', 'build-html', 'css'],
+    ['build-system', 'build-html', 'sass'],
     callback
   );
 });
 
 gulp.task('serve', ['build'], function(done) {
-  browserSync({
+  browserSync.init({
     open: false,
     port: 9000,
     files: {
@@ -88,15 +101,45 @@ gulp.task('serve', ['build'], function(done) {
   }, done);
 });
 
-gulp.task('css', function () {
-    return gulp.src(path.css)
-        .pipe(reload({stream:true}));
+gulp.task('sass', function() {
+  return gulp.src(['css/sass/**/*.scss', '!css/sass/doc/**/*.scss'])
+  .pipe(plumber())
+  .pipe(sourcemaps.init())
+  .pipe(sass())
+  .on('error', function(err) {
+    console.log(err.toString());
+    this.emit('end');
+  })
+  .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))
+  .pipe(sourcemaps.write('.'))
+  .pipe(gulp.dest('css'))
 });
 
-gulp.task('watch', ['serve'], function() {
-  var watcher = gulp.watch([path.scripts, path.html], ['build']);
-  watcher.on('change', function(event) {
-    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-  });
-  gulp.watch(path.css, ['css']);
+gulp.task('purify', function() {
+  return gulp.src('css/main.css')
+    .pipe(purify(['src/**/*.js', '**/*.html']))
+    .pipe(rename('main.clean.css'))
+    .pipe(gulp.dest('css'));
 });
+
+gulp.task('prepare-watch', function (done) {
+  return runSequence(['clean-dist', 'serve'], done);
+});
+
+gulp.task('watch', ['prepare-watch'], function() {
+  gulp.watch([path.source, path.html], ['build']);
+  gulp.watch(['css/sass/**/*.scss', '!css/sass/doc/**/*.scss'], ['sass', 'styledoc']);
+  gulp.watch('css/sass/doc/**/*.scss', ['styledoc']);
+});
+
+
+function getConfig () {
+  var config = {};
+  try {
+    config = require('./config.json')[NODE_ENV];
+  } catch (e) {
+    throw new Error('tasks/config.json is malformed');
+  }
+  config.NODE_ENV = NODE_ENV;
+  return config;
+}

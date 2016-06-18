@@ -5,8 +5,11 @@ var gulp = require('gulp'),
     html: ['index.html', 'src/**/*.html'],
     output:'dist/',
     css: 'css/*.css',
+    sass: 'src/styles/**/*.scss',
     bundle: 'bundle/',
-    appmodule: 'src/app'
+    appmodule: 'src/app',
+    images: 'img/**/*',
+    fonts: 'fonts/**/*'
   },
   bundleTask = require('./tasks/bundle')(path),
   watchTask = require('./tasks/watch')(path);
