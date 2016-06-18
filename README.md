@@ -188,3 +188,59 @@ export default class MyController {
 ```
 
 That doesn't work with local injections like `$scope` or `$element`. You'll have to use `@inject` and load them in the constructor.
+
+
+### UI-Router
+
+Some decorators are available to work with ui-router. If you don't use another router, you can use
+theses decorators out of the box:
+
+#### State
+
+This will specify a new state route with the following controller set as `controllerAs`.
+
+```js
+import {state} from './path/to/config/decorators';
+import {baseURL} from './path/to/config/constants';
+
+@state('app.foo', {
+  url: '/foo',
+  //template: `<p>Hello World</p>`,
+  templateUrl: `${baseURL}url.html`,
+  resolve: {
+    bar: (Service) => Service.getSomething()
+  }
+})
+class MyController {
+  constructor () {
+    // this.bar is set \o/
+  }
+}
+```
+
+#### Component
+
+You can specify a state build on a component styled directive. The difference with `@state` is
+that you are working on a re-usable directive instead of a pair of controller/template.
+
+```js
+import {component} from './path/to/config/decorators';
+import {baseURL} from './path/to/config/constants';
+
+@component('app.foo', {
+  url: '/foo',
+  resolve: {
+    bar: () => 'bar'
+  },
+  //template: `<p>{{ ctrl.bar }}</p>`,
+  templateUrl: `${baseURL}url.html,
+  scope: {
+    bar: '='
+  }
+})
+class MyDirective {
+  link () {
+    // this.bar === 'bar'
+  }
+}
+```
