@@ -1,272 +1,190 @@
-Babel JSPM Karma Jasmine Istanbul Coverage Test
-===============================================
+Angular 1.x JSPM Babel 6 starter
+================================
 
-A sample repo to show what's need to get HTML code coverage reports working when using [Babel](https://babeljs.io/), [JSPM](http://jspm.io/), [Karma](http://karma-runner.github.io/), [Jasmine](http://jasmine.github.io/) and [Istanbul](https://github.com/gotwarlost/istanbul).
+This boilerplate help to start a new Angular 1.x app with modern ECMAscript. Inspired by [angular_es6](https://github.com/zewa666/angular_es6) which is inspired by [Aurelia](http://aurelia.io) and updated with [babel-jspm-karma-jasmine-istanbul](https://github.com/gunnarlium/babel-jspm-karma-jasmine-istanbul), you can build your app with decorators and async/await in ES6 coding style, loading dependancies with JSPM, testing your code with jasmine and have code coverage report. Finally, you can build your app and deploy it on your production environnement.
 
-To install and run:
 
-	$ npm install -g jspm karma-cli
+Install
+=======
+
+	$ npm install -g jspm karma-cli gulp
 	$ npm install
-	$ karma start karma.conf.js
-	$ open coverage/phantomjs/index.html
 
-Tutorial
---------
+Start developping
+=================
 
-When living on the edge, getting the tooling of the past to work as expected requires a bit of extra work. I'll walk you through the steps you need to get set up.
+You'll find all your Angular app code in the `src` folder. You should only have to add code in `components` folder and sometimes in `app.js`. The app is configured to work with ui-router but you should hack `src/config/decorators/decorators-router.js` if you want to use another one. Styles are compiled with SASS and are located in `src/styles`.
 
-### The goal
+When you are ready to make your app work, just start the app :
 
-Set up Karma testing with code coverage for a project that uses Babel, JSPM and Jasmine.
+	$ npm start
 
-### The problem
+And load [http://localhost:9000](http://localhost:9000) in your browser. Your code will be watched and the browser will be automatically reloaded when you change a file.
 
-Both your tests and your code written in ES6 need to be transpiled to ES5 before being run. However, you want your code coverage report to show you the files as they were before transpilation, so you recognize the content.
+Testing your code
+=================
 
-### The solution
+	$ npm test
 
-Use source maps to make the generated HTML match you're original files.
+Your code will be tested in PhantomJS and you'll have a code coverage report.
 
-Bootstrapping your project
---------------------------
+Deploy your code
+================
 
-Make sure you have jspm installed globally.
+	$ npm run build
 
-	$ npm install -g jspm
+Your app will be bundled in the `bundle` folder that you'll just copy on your remote server.
 
-Init JSPM:
+Coding Style with Decorators
+============================
 
-	$ jspm init
+## Using decorators
 
-Use the defaults for everything except `server baseURL`, set this to `src`. It should look something like this:
+There is a base decorator called `@register` which performs generic component registrations. In order to
+save work you may use one of the following concrete implementations, which allow you to omit the type
+information. In fact, the class will be registered as a constant/value/factory/whatever in the `decorartors` angular module which is loaded in the app module creation (see `src/app.js`).
 
-```
-$ jspm init
-Package.json file does not exist, create it? [yes]:
-Would you like jspm to prefix the jspm package.json properties under jspm? [yes]:
-Enter server baseURL (public folder path) [./]:src
-Enter jspm packages folder [src/jspm_packages]:
-Enter config file path [src/config.js]:
-Configuration file src/config.js doesn't exist, create it? [yes]:
-Enter client baseURL (public folder URL) [/]:
-Which ES6 transpiler would you like to use, Traceur or Babel? [babel]:
-```
-
-With package.json created, also lock down the version of jspm:
-
-	$ npm install --save-dev jspm
-
-As JSPM currently defaults to Babel 5, update the `jspm` key in `package.json` to use Babel 6:
+### Constants
 
 ```js
-  "jspm": {
-    "directories": {
-      "baseURL": "src"
-    },
-    "devDependencies": {
-      "babel": "npm:babel-core@^6.3.17",
-      "babel-runtime": "npm:babel-runtime@^6.3.17",
-      "core-js": "npm:core-js@^1.1.4"
-    }
+import {constant} from './path/to/config/decorators';
+
+@constant
+export default class MyConstant {
+  constructor () {
+    return 'my-constant';
   }
-```
-
-As the purpose is to get tests set up, we'll start by writing a simple test. In `src/hello.spec.js`, enter:
-
-```js
-'use strict';
-
-import {hello} from './hello';
-
-describe('hello', () => {
-
-	it('should return Hello Foo', function () {
-		expect(hello()).toEqual('Hello Foo');
-	});
-});
-
-```
-
-We're using a little bit of ES6 here, to show that your tests can also be written in ES6.
-
-Go ahead an create the implementation at the same time. In `src/hello.js` enter:
-
-```js
-'use strict';
-
-export function hello() {
-	let name = 'Foo';
-	let greeting = `Hello ${name}`;
-
-	if (false) {
-		// Should not be covered
-		return 'Good bye';
-	}
-
-	return greeting;
 }
 ```
 
-
-Setting up the test environment
--------------------------------
-
-With our test written, it's time to start adding a few test related dependencies, so we can run it.
-
-First, let's install the basics needed for Jasmine and Karma with PhantomJS:
-
-	$ npm install -g karma-cli
-	$ npm install --save-dev phantomjs jasmine jasmine-core karma karma-jasmine karma-phantomjs-launcher karma-jspm
-
-Also, create a simple `karma.conf.js`:
+### Values
 
 ```js
-/* global module */
-module.exports = function (config) {
-	'use strict';
-	config.set({
-		autoWatch: true,
-		singleRun: true,
+import {value} from './path/to/config/decorators';
 
-		frameworks: ['jspm', 'jasmine'],
-
-		jspm: {
-			config: 'src/config.js',
-			loadFiles: [
-				'src/*.spec.js'
-			],
-			serveFiles: [
-				'src/!(*spec).js'
-			]
-		},
-
-		proxies: {
-			'/src/': '/base/src/',
-			'/jspm_packages/': '/src/jspm_packages/'
-		},
-
-		browsers: ['PhantomJS'],
-
-		reporters: ['progress'],
-
-	});
-
-};
-
-```
-
-At this point, you should be able to run `karma start karma.conf.js`, but it will error without much explanation, as your transpiling isn't quite ready yet. You need to install `babel-core` and `karma-babel-preprocessor`:
-
-	$ npm install --save-dev babel-core babel-preset-es2015 babel-polyfill karma-babel-preprocessor
-
-Load the polyfill in your Karma config:
-
-```js
-files: [
-    'node_modules/babel-polyfill/dist/polyfill.js'
-]
-```
-
-Set up your Babel config in `.babelrc`:
-
-```js
-{
-  "presets": ["es2015"]
+@value
+export default class MyValue {
+  constructor () {
+    return 'my-value';
+  }
 }
 ```
 
-This is needed since SystemJS depends on `Function.bind()`, which is not supported in PhantomJS.
-
-If you rerun Karma, your tests should be passing. If you didn't care about HTML coverage reports, you could go on your way, and have a fully working ES6, Karma, Jasmine, JSPM and Babel setup. Not too bad!
-
-Coverage
---------
-
-For coverage reports, we'll use Istanbul and the Karma coverage  plugin:
-
-	$ npm install --save-dev istanbul karma-coverage
-
-You also need to update your karma config:
+### Factories
 
 ```js
+import {factory} from './path/to/config/decorators';
 
-reporters: ['progress', 'coverage'],
-
-preprocessors: {
-	'src/!(*spec).js': ['babel', 'coverage']
-},
-
-coverageReporter: {
-	reporters: [
-		{
-			type: 'text-summary'
-		},
-		{
-			type: 'html',
-			dir: 'coverage/'
-		}
-	]
-}
-
-```
-
-If you run your tests now, you should find a coverage report in the `coverage` folder, with proper highlighting of covered code. However, what you're seeing is the transpiled code. For this simple code, that shouldn't be too hard to mentally connect to your source files, but wouldn't it better if you could be looking at ES6 code instead? Let's fix that!
-
-You'll need a couple more dependencies. First, we'll install [isparta](https://github.com/douglasduteil/isparta), which is designed to be used with Istanbul with Babel and Karma/Karma Coverage:
-
-	$ npm install --save-dev isparta
-
-isparta works as a custom instrumentor, which must be registred in Karma config:
-
-```js
-coverageReporter: {
-	instrumenters: {isparta: require('isparta')},
-	instrumenter: {
-		'src/*.js': 'isparta'
-	},
-
-	reporters: [
-		{
-			type: 'text-summary',
-		},
-		{
-			type: 'html',
-			dir: 'coverage/',
-		}
-	]
+@factory
+export default class MyFactory {
+  constructor (/* dependancies */) { }
 }
 ```
 
-If you're reading this in the future, your coverage report may already be showing you ES6 code. As I'm stuck in the past, I need to use a custom version of `karma-coverage`. Update your `package.json` to use `douglasduteil/karma-coverage#next`:
-
-	"karma-coverage": "douglasduteil/karma-coverage#next"
-
-Now you're almost there. Your tests are running, you get coverage reports, and their all in beautiful ES6. There's one problem, however. If you look closely at the coverage for `hello.js`, you'll see that the coverage is highlighting the wrong lines. We can fix this by adding source maps.
-
-	$ npm install --save-dev karma-sourcemap-loader
-
-In Karma config:
+### Services
 
 ```js
+import {service} from './path/to/config/decorators';
 
-preprocessors: {
-	'src/!(*spec).js': ['babel', 'sourcemap', 'coverage']
-},
-
-
-babelPreprocessor: {
-	options: {
-		sourceMap: 'inline',
-		blacklist: ['useStrict']
-	},
-	sourceFileName: function(file) {
-		return file.originalPath;
-	}
-},
+@service
+export default class MyService {
+  constructor (/* dependancies */) { }
+}
 ```
 
-Again, if you're living in the future, this might already be working for you. If not, you need to use another custom version of a dependency, this time Istanbul:
+### Providers
 
-	"istanbul": "gotwarlost/istanbul.git#source-map"
+```js
+import {provider} from './path/to/config/decorators';
 
-Boom! If you run Karma again, line highlighting should also be working.
+@provider
+export default class MyProvider {
+  constructor (/* dependancies */) { }
+}
+```
+
+### Controllers
+
+```js
+import {controller} from './path/to/config/decorators';
+
+@controller
+export default class MyController {
+  constructor (/* dependancies */) { }
+}
+```
+
+### Directives
+
+```js
+import {directive} from './path/to/config/decorators';
+import {baseURL} from './path/to/config/constants';
+
+@directive({
+  restrict: 'E',
+  templateUrl: `${baseURL}/path/to/the/template.html`
+})
+export default class MyController {
+  constructor (/* dependancies */) {
+    this.foo = 'bar';
+  }
+}
+
+// In template.html :
+
+<p>{{ ctrl.foo }} will display "bar"</p>
+```
+
+### Filters
+
+```js
+import {filter} from './path/to/config/decorators';
+
+@filter
+export default class MyFilter {
+  constructor (/* dependancies */) { }
+  filter (input) {
+    return input.toUpperCase();
+  }
+}
+```
+
+### Injections
+
+In order to inject existing components/services into your new component you can leverage the following
+decorator as depicted in the example below.
+
+```js
+import {inject} from './path/to/config/decorators';
+
+@controller
+@inject('$http', 'MyService')
+export default class MyController {
+  constructor ($http, MyService) { }
+}
+```
+
+### Injection as a property
+
+Let's say you want to inject a component/service but use it with a different property name. In order to do so use the
+`injectAs` decorator
+
+```js
+import {inject, injectAs} from './path/to/config/decorators';
+
+@controller
+export default class MyController {
+  @inject $http = null;
+  @inject MyService = null;
+  @injectAs('$q') Promise = null;
+  doSomething () {
+    return this.Promise((resolve, reject) {
+      $http.get(this.MyService.path)
+        .success(data => resolve(data)
+        .error(err => reject(err));
+    });
+  }
+}
+```
+
+That doesn't work with local injections like `$scope` or `$element`. You'll have to use `@inject` and load them in the constructor.
