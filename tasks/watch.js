@@ -70,7 +70,8 @@ gulp.task('lint', function() {
 });
 
 gulp.task('clean-dist', function (done) {
-  del('dist', done);
+  del.sync([path.dist]);
+  done();
 });
 
 gulp.task('build', function(callback) {
@@ -102,7 +103,7 @@ gulp.task('serve', ['build'], function(done) {
 });
 
 gulp.task('sass', function() {
-  return gulp.src(['css/sass/**/*.scss', '!css/sass/doc/**/*.scss'])
+  return gulp.src(path.sass)
   .pipe(plumber())
   .pipe(sourcemaps.init())
   .pipe(sass())
@@ -123,7 +124,7 @@ gulp.task('purify', function() {
 });
 
 gulp.task('prepare-watch', function (done) {
-  return runSequence(['clean-dist', 'serve'], done);
+  return runSequence('clean-dist', 'serve', done);
 });
 
 gulp.task('watch', ['prepare-watch'], function() {
