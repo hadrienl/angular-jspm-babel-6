@@ -1,1 +1,0 @@
-{"version":3,"sources":["styles.scss"],"names":[],"mappings":"AACA;EACE,gBAFO,EAGR","file":"styles.css","sourcesContent":["$red: red;\nbody {\n  background: $red;\n}\n"],"sourceRoot":"/source/"}
